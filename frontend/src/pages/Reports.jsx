@@ -116,37 +116,62 @@ function Reports() {
         )}
       </div>
 
-      <Modal isOpen={Boolean(selected)} onClose={() => setSelected(null)} title={selected ? `${selected.id} details` : 'Report details'}>
+      <Modal isOpen={Boolean(selected)} onClose={() => setSelected(null)} title={selected ? `${selected.id} - ${selected.crop} Report` : 'Report details'}>
         {selected && (
           <div className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {[
-                ['Disease', selected.disease ?? 'Unknown'],
-                ['Confidence', `${selected.confidence ?? 0}%`],
-                ['Location', selected.locationName ?? 'Unknown'],
-                ['Severity', selected.severity],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-3xl bg-beige p-4">
-                  <p className="text-sm text-text-muted">{label}</p>
-                  <p className="mt-2 text-xl text-text-dark">{value}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="rounded-3xl bg-moss-900 p-5 text-white">
-              <p className="text-sm uppercase tracking-[0.16em] text-white/70">Summary</p>
-              <p className="mt-3 text-sm leading-7 text-white/85">{selected.summary ?? 'No summary available.'}</p>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">AI recommendations</p>
-              <div className="mt-3 space-y-3">
-                {(selected.recommendations ?? [selected.summary ?? 'No recommendation available']).map((item) => (
-                  <div key={item} className="rounded-3xl bg-earth-50 px-4 py-3 text-sm text-slate-700">
-                    {item}
-                  </div>
-                ))}
+            {/* Key Metrics */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl bg-beige p-4">
+                <p className="text-xs uppercase tracking-wide text-text-muted">Disease</p>
+                <p className="mt-2 text-lg font-semibold text-text-dark">{selected.disease ?? 'Unknown'}</p>
               </div>
+              <div className="rounded-2xl bg-moss-pale p-4">
+                <p className="text-xs uppercase tracking-wide text-text-muted">Confidence</p>
+                <p className="mt-2 text-lg font-semibold text-moss">{selected.confidence ?? 0}%</p>
+              </div>
+              <div className="rounded-2xl bg-earth-50 p-4">
+                <p className="text-xs uppercase tracking-wide text-text-muted">Severity</p>
+                <p className="mt-2 text-lg font-semibold text-text-dark">{selected.severity ?? 'Unknown'}</p>
+              </div>
+              <div className="rounded-2xl bg-white border border-[#e8e1d7] p-4">
+                <p className="text-xs uppercase tracking-wide text-text-muted">Location</p>
+                <p className="mt-2 text-sm font-semibold text-text-dark truncate">{selected.locationName ?? 'Unknown'}</p>
+              </div>
+            </div>
+
+            {/* Report Info */}
+            <div className="rounded-2xl bg-gray-50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-text-muted">Report ID</p>
+                <p className="font-mono text-sm font-medium">{selected.id}</p>
+              </div>
+              <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                <p className="text-sm text-text-muted">Date</p>
+                <p className="text-sm font-medium">{formatDate(selected.reportDate)}</p>
+              </div>
+              <div className="flex items-center justify-between border-t border-gray-200 pt-3">
+                <p className="text-sm text-text-muted">Crop</p>
+                <p className="text-sm font-medium">{selected.crop}</p>
+              </div>
+            </div>
+
+            {/* Summary & Recommendation */}
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-text-muted mb-3">Analysis & Recommendation</p>
+              <div className="rounded-2xl bg-moss-pale p-4 text-sm leading-relaxed text-text-dark">
+                {selected.summary ?? selected.recommendation ?? 'No analysis available.'}
+              </div>
+            </div>
+
+            {/* Download Button */}
+            <div className="flex gap-3">
+              <Button onClick={() => handleDownload(selected)} className="flex-1">
+                <Download className="h-4 w-4" />
+                Download PDF Report
+              </Button>
+              <Button variant="secondary" onClick={() => setSelected(null)}>
+                Close
+              </Button>
             </div>
           </div>
         )}
