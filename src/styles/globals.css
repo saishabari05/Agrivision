@@ -1,0 +1,82 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-black/5;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-cream font-sans text-text-dark antialiased;
+    background-image: theme('backgroundImage.heroGlow'), theme('backgroundImage.grain');
+  }
+
+  ::selection {
+    @apply bg-moss/15 text-text-dark;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-sans font-semibold tracking-[-0.02em];
+  }
+
+  a,
+  button {
+    @apply transition duration-300;
+  }
+}
+
+@layer components {
+  .surface {
+    @apply rounded-3xl border border-[#d9d4c8]/70 bg-warmwhite shadow-soft;
+  }
+
+  .glass {
+    @apply rounded-3xl border border-white/70 bg-white/75 shadow-glass backdrop-blur-md;
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-[#d9d4c8] bg-white px-4 py-3 text-sm text-text-dark placeholder:text-text-muted shadow-[inset_0_1px_2px_rgba(31,42,33,0.04)] focus:border-moss focus:ring-2 focus:ring-moss/15;
+  }
+
+  .page-wrap {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  .panel-label {
+    @apply text-[11px] font-semibold uppercase tracking-[0.22em] text-text-muted;
+  }
+
+  .ai-dot {
+    @apply inline-flex h-2.5 w-2.5 rounded-full bg-moss;
+    box-shadow: 0 0 0 0 rgba(63, 107, 75, 0.45);
+    animation: aiPulse 2.2s infinite;
+  }
+}
+
+@keyframes aiPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(63, 107, 75, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(63, 107, 75, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(63, 107, 75, 0);
+  }
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+  border-radius: 1.5rem;
+}
