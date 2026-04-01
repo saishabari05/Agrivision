@@ -2,28 +2,45 @@ import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   forgotPassword as forgotPasswordService,
   loginWithEmail,
-  loginWithGoogle,
   logoutUser,
+  registerWithEmail,
   updateProfile as updateProfileService,
 } from '../services/authService';
-import { mockProfile, mockReports, mockUploads } from '../services/mockData';
+import { createFarm as createFarmApi, deleteFarm as deleteFarmApi, deleteReport as deleteReportApi, fetchFarms, fetchProfile, fetchReports, fetchUploads, updateFarm as updateFarmApi } from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [splashComplete, setSplashComplete] = useState(false);
-  const [uploads, setUploads] = useState(mockUploads);
-  const [reports, setReports] = useState(mockReports);
+  const [uploads, setUploads] = useState([]);
+  const [reports, setReports] = useState([]);
+  const [farms, setFarms] = useState([]);
 
   useEffect(() => {
     const splashTimer = window.setTimeout(() => setSplashComplete(true), 2200);
     const storedUser = window.localStorage.getItem('agrivision_user');
 
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    if (storedUser) setUser(JSON.parse(storedUser));
+
+    Promise.allSettled([fetchProfile(), fetchUploads(), fetchReports(), fetchFarms()]).then((results) => {
+      const [profileResult, uploadsResult, reportsResult, farmsResult] = results;
+
+      if (profileResult.status === 'fulfilled') {
+        setProfile(profileResult.value);
+      }
+      if (uploadsResult.status === 'fulfilled') {
+        setUploads(Array.isArray(uploadsResult.value?.items) ? uploadsResult.value.items : []);
+      }
+      if (reportsResult.status === 'fulfilled') {
+        setReports(Array.isArray(reportsResult.value?.items) ? reportsResult.value.items : []);
+      }
+      if (farmsResult.status === 'fulfilled') {
+        setFarms(Array.isArray(farmsResult.value?.items) ? farmsResult.value.items : []);
+      }
+    });
 
     return () => window.clearTimeout(splashTimer);
   }, []);
@@ -46,10 +63,10 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const signInWithGoogle = async () => {
+  const register = async (name, email, password) => {
     setLoading(true);
     try {
-      const loggedInUser = await loginWithGoogle();
+      const loggedInUser = await registerWithEmail(name, email, password);
       persistUser(loggedInUser);
       return { success: true };
     } catch (error) {
@@ -68,9 +85,12 @@ export function AuthProvider({ children }) {
   const forgotPassword = async (email) => forgotPasswordService(email);
 
   const updateProfile = async (updates) => {
-    if (!user) return;
-    const nextUser = await updateProfileService({ ...user, ...updates });
-    persistUser(nextUser);
+    const nextProfile = await updateProfileService({ ...(profile ?? {}), ...updates });
+    setProfile(nextProfile);
+    if (user) {
+      const nextUser = { ...user, ...nextProfile };
+      persistUser(nextUser);
+    }
   };
 
   const addUploadResult = (payload) => {
@@ -81,30 +101,53 @@ export function AuthProvider({ children }) {
     setReports((current) => [report, ...current]);
   };
 
-  const deleteReport = (reportId) => {
+  const createFarm = async (payload) => {
+    const farm = await createFarmApi(payload);
+    setFarms((current) => [farm, ...current]);
+    return farm;
+  };
+
+  const updateFarm = async (farmId, payload) => {
+    const farm = await updateFarmApi(farmId, payload);
+    setFarms((current) => current.map((item) => (item.id === farmId ? farm : item)));
+    return farm;
+  };
+
+  const deleteFarm = async (farmId) => {
+    await deleteFarmApi(farmId);
+    setFarms((current) => current.filter((farm) => farm.id !== farmId));
+  };
+
+  const deleteReport = async (reportId) => {
+    await deleteReportApi(reportId);
     setReports((current) => current.filter((report) => report.id !== reportId));
   };
 
   const value = useMemo(
     () => ({
       user,
-      previewProfile: user ?? mockProfile,
+      previewProfile: profile ?? user,
       isAuthenticated: Boolean(user),
       loading,
       splashComplete,
       uploads,
       reports,
+      farms,
       login,
-      signInWithGoogle,
+      register,
       logout,
       forgotPassword,
       updateProfile,
       addUploadResult,
       addReport,
+      createFarm,
+      updateFarm,
+      deleteFarm,
       deleteReport,
       setReports,
+      setFarms,
     }),
-    [user, loading, splashComplete, uploads, reports],
+    [user, profile, loading, splashComplete, uploads, reports, farms],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

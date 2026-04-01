@@ -66,9 +66,9 @@ function DashboardPage() {
                 icon: FileText,
               },
               {
-                title: 'Ask the chatbot',
+                title: 'Open assistant',
                 description: 'Use the assistant for recommendations and report explanations.',
-                to: '/chatbot',
+                to: '/chat',
                 icon: Bot,
               },
             ].map(({ title, description, to, icon: Icon }) => (

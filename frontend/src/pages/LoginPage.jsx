@@ -11,7 +11,7 @@ function LoginPage() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
-  const { login, signInWithGoogle, forgotPassword, loading } = useAuth();
+  const { login, forgotPassword, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -38,17 +38,6 @@ function LoginPage() {
     }
 
     navigate(location.state?.from ?? '/client-overview');
-  };
-
-  const handleGoogleLogin = async () => {
-    const result = await signInWithGoogle();
-
-    if (!result.success) {
-      setMessage(result.message);
-      return;
-    }
-
-    navigate('/client-overview');
   };
 
   const handleForgotPassword = async () => {
@@ -154,9 +143,6 @@ function LoginPage() {
 
             <Button type="submit" loading={loading} className="w-full">
               Sign in
-            </Button>
-            <Button type="button" variant="secondary" onClick={handleGoogleLogin} className="w-full" loading={loading}>
-              Continue with Google
             </Button>
           </form>
         </motion.div>

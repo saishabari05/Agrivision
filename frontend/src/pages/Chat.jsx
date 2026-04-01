@@ -2,6 +2,7 @@ import { Bot, Leaf, MapPinned, Search, SendHorizontal, TriangleAlert, FileText }
 import { useState } from 'react';
 import logo from '../assets/logo.png';
 import AppFrame from '../components/AppFrame';
+import { sendChatMessage } from '../services/api';
 
 const suggestions = [
   'Summarize spread risk for Shimla Orchard Belt',
@@ -22,25 +23,56 @@ function Chat() {
   ]);
   const [draft, setDraft] = useState('');
   const [thinking, setThinking] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSend = (content = draft) => {
+  const handleSend = async (content = draft) => {
     if (!content.trim()) return;
     setMessages((current) => [...current, { id: Date.now(), role: 'user', content }]);
     setDraft('');
     setThinking(true);
+    setError('');
 
-    window.setTimeout(() => {
+    const sessionId = window.localStorage.getItem('agrivision_last_session_id');
+    if (!sessionId) {
       setMessages((current) => [
         ...current,
         {
           id: Date.now() + 1,
           role: 'assistant',
-          content:
-            'LLM response placeholder: connect your backend to return farm-aware summaries, contact suggestions, spread analysis, and alert-ready messages.',
+          content: 'Please run an image analysis first from Upload page so I can use the disease context.',
         },
       ]);
       setThinking(false);
-    }, 1000);
+      return;
+    }
+
+    try {
+      const response = await sendChatMessage({
+        session_id: sessionId,
+        message: content,
+      });
+
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: response.response,
+        },
+      ]);
+    } catch (chatError) {
+      setError('Unable to fetch chat response from backend.');
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: 'Backend chat failed. Please verify API server and session validity.',
+        },
+      ]);
+    } finally {
+      setThinking(false);
+    }
   };
 
   return (
@@ -130,6 +162,7 @@ function Chat() {
           </div>
 
           <div className="border-t border-moss/10 px-6 py-4">
+            {error && <p className="mb-2 text-sm text-rose-700">{error}</p>}
             <div className="flex gap-3">
               <input
                 value={draft}

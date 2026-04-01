@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Bot, ChevronUp, SendHorizontal } from 'lucide-react';
 import { useState } from 'react';
+import { sendChatMessage } from '../services/api';
 import Button from './Button';
 
 function ChatWidget() {
@@ -13,19 +14,42 @@ function ChatWidget() {
     },
   ]);
   const [draft, setDraft] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!draft.trim()) return;
-    setMessages((current) => [
-      ...current,
-      { id: Date.now(), role: 'user', content: draft },
-      {
-        id: Date.now() + 1,
-        role: 'assistant',
-        content: 'This is an LLM-ready placeholder. Connect your backend to return farm-aware agronomy guidance.',
-      },
-    ]);
+
+    const message = draft;
     setDraft('');
+    setError('');
+    setMessages((current) => [...current, { id: Date.now(), role: 'user', content: message }]);
+
+    const sessionId = window.localStorage.getItem('agrivision_last_session_id');
+    if (!sessionId) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: 'Run analysis from Upload page first so chat can use disease context.',
+        },
+      ]);
+      return;
+    }
+
+    try {
+      const response = await sendChatMessage({ session_id: sessionId, message });
+      setMessages((current) => [
+        ...current,
+        {
+          id: Date.now() + 1,
+          role: 'assistant',
+          content: response.response,
+        },
+      ]);
+    } catch {
+      setError('Unable to reach backend chat API.');
+    }
   };
 
   return (
@@ -57,6 +81,7 @@ function ChatWidget() {
               ))}
             </div>
             <div className="border-t border-moss/10 p-3">
+              {error && <p className="mb-2 text-xs text-rose-700">{error}</p>}
               <div className="flex gap-2">
                 <input
                   value={draft}

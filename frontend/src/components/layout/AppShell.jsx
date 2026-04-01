@@ -20,7 +20,7 @@ const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/upload', label: 'Upload', icon: ScanSearch },
   { to: '/reports', label: 'Reports', icon: FileText },
-  { to: '/chatbot', label: 'Chatbot', icon: Bot },
+  { to: '/chat', label: 'Assistant', icon: Bot },
   { to: '/profile', label: 'Profile', icon: UserRound },
 ];
 

@@ -9,7 +9,7 @@ import { downloadReportPdf } from '../services/pdfService';
 import { formatDate, severityColor } from '../utils/formatters';
 
 function ReportsPage() {
-  const { reports, deleteReport } = useAuth();
+  const { reports, deleteReport, farms } = useAuth();
   const [filters, setFilters] = useState({ query: '', crop: 'All', severity: 'All', sort: 'Newest' });
   const [selectedReport, setSelectedReport] = useState(null);
 
@@ -27,6 +27,13 @@ function ReportsPage() {
           : new Date(a.reportDate) - new Date(b.reportDate),
       );
   }, [filters, reports]);
+
+  const matchedFarm = selectedReport
+    ? farms.find((farm) =>
+        String(farm.location ?? '').toLowerCase().includes(String(selectedReport.locationName ?? '').toLowerCase()) ||
+        String(selectedReport.locationName ?? '').toLowerCase().includes(String(farm.location ?? '').toLowerCase()),
+      )
+    : null;
 
   return (
     <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -145,6 +152,24 @@ function ReportsPage() {
                 ))}
               </div>
             </div>
+
+            {matchedFarm && (matchedFarm.email || matchedFarm.phone) && (
+              <div className="rounded-3xl bg-moss-pale p-5">
+                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-moss">Share with farmer</p>
+                <div className="mt-4 flex flex-wrap gap-3">
+                  {matchedFarm.email && (
+                    <a href={`mailto:${matchedFarm.email}?subject=${encodeURIComponent(`${selectedReport.crop} disease report`)}&body=${encodeURIComponent(selectedReport.summary ?? '')}`}>
+                      <Button variant="secondary">Email report</Button>
+                    </a>
+                  )}
+                  {matchedFarm.phone && (
+                    <a href={`https://wa.me/${matchedFarm.phone.replace(/\D/g, '')}?text=${encodeURIComponent(selectedReport.summary ?? '')}`} target="_blank" rel="noreferrer">
+                      <Button variant="secondary">WhatsApp report</Button>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </Modal>

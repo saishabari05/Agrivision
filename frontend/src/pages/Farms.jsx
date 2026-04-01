@@ -1,92 +1,132 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import {
-  LandPlot,
-  MapPin,
-  Pencil,
-  Phone,
-  Plus,
-  Trash2,
-  Wheat,
-  X,
-} from 'lucide-react';
+﻿import { motion } from 'framer-motion';
+import { LandPlot, MapPin, Mail, Pencil, Phone, Plus, Trash2, Wheat } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import AppFrame from '../components/AppFrame';
 import Badge from '../components/Badge';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import Modal from '../components/Modal';
+import { useAuth } from '../context/AuthContext';
 
-const farms = [
-  {
-    id: 'FRM-101',
-    name: 'Nashik North Estate',
-    owner: 'Aarav Patel',
-    crop: 'Tomato',
-    acreage: '840 acres',
-    location: 'Nashik, Maharashtra',
-    risk: 'Moderate',
-    alerts: 3,
-    phone: '+91 98765 43210',
-    updated: 'Updated 2 hours ago',
-  },
-  {
-    id: 'FRM-102',
-    name: 'Shimla Orchard Belt',
-    owner: 'Priya Sharma',
-    crop: 'Apple',
-    acreage: '1,240 acres',
-    location: 'Shimla, Himachal Pradesh',
-    risk: 'High',
-    alerts: 5,
-    phone: '+91 98989 12345',
-    updated: 'Updated 45 minutes ago',
-  },
-  {
-    id: 'FRM-103',
-    name: 'Pune Vineyard Cluster',
-    owner: 'Rohan Deshmukh',
-    crop: 'Grape',
-    acreage: '920 acres',
-    location: 'Pune, Maharashtra',
-    risk: 'Low',
-    alerts: 1,
-    phone: '+91 98888 76543',
-    updated: 'Updated yesterday',
-  },
-];
+const emptyFarmForm = {
+  name: '',
+  owner: '',
+  crop: 'Tomato',
+  acreage: '',
+  location: '',
+  risk: 'Moderate',
+  alerts: '0',
+  phone: '',
+  email: '',
+};
 
 function Farms() {
+  const { farms, createFarm, updateFarm, deleteFarm } = useAuth();
   const [selectedFarm, setSelectedFarm] = useState(null);
-  const [showCreate, setShowCreate] = useState(false);
+  const [editingFarm, setEditingFarm] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+  const [form, setForm] = useState(emptyFarmForm);
 
-  const filteredFarms = useMemo(
-    () =>
-      farms.filter((farm) =>
-        `${farm.name} ${farm.owner} ${farm.location} ${farm.crop}`.toLowerCase().includes(query.toLowerCase()),
-      ),
-    [query],
-  );
+  const filteredFarms = useMemo(() => {
+    return farms.filter((farm) => {
+      const haystack = `${farm.name} ${farm.owner} ${farm.location} ${farm.crop}`.toLowerCase();
+      return haystack.includes(query.toLowerCase());
+    });
+  }, [farms, query]);
+
+  const openCreate = () => {
+    setEditingFarm(null);
+    setForm(emptyFarmForm);
+    setError('');
+    setIsFormOpen(true);
+  };
+
+  const openEdit = (farm) => {
+    setEditingFarm(farm);
+    setForm({
+      name: farm.name ?? '',
+      owner: farm.owner ?? '',
+      crop: farm.crop ?? 'Tomato',
+      acreage: farm.acreage ?? '',
+      location: farm.location ?? '',
+      risk: farm.risk ?? 'Moderate',
+      alerts: String(farm.alerts ?? 0),
+      phone: farm.phone ?? '',
+      email: farm.email ?? '',
+    });
+    setError('');
+    setIsFormOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!form.name.trim() || !form.owner.trim() || !form.location.trim() || !form.crop.trim()) {
+      setError('Farm name, owner, crop, and location are required.');
+      return;
+    }
+
+    setSaving(true);
+    setError('');
+
+    const payload = {
+      name: form.name.trim(),
+      owner: form.owner.trim(),
+      crop: form.crop.trim(),
+      acreage: form.acreage.trim() || '0 acres',
+      location: form.location.trim(),
+      risk: form.risk,
+      alerts: Number(form.alerts || 0),
+      phone: form.phone.trim(),
+      email: form.email.trim(),
+      updated: 'Updated just now',
+    };
+
+    try {
+      if (editingFarm) {
+        await updateFarm(editingFarm.id, payload);
+      } else {
+        await createFarm(payload);
+      }
+      setIsFormOpen(false);
+    } catch (saveError) {
+      setError(saveError.message || 'Unable to save farm.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleArchive = async (farm) => {
+    await updateFarm(farm.id, { archived: true, updated: 'Archived just now' });
+  };
+
+  const handleDelete = async (farm) => {
+    await deleteFarm(farm.id);
+    if (selectedFarm?.id === farm.id) {
+      setSelectedFarm(null);
+    }
+  };
 
   return (
-    <AppFrame title="Farm Management" subtitle="Add, organize, and monitor farms with clear ownership, risk, and operational context.">
+    <AppFrame title="Farm Registry" subtitle="Manage client farms, contact details, acreage, and risk status in one clean workspace.">
       <div className="space-y-6">
         <Card>
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="panel-label">Farm registry</p>
-              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-text-dark">Manage active agricultural sites</h2>
+              <p className="panel-label">Client farms</p>
+              <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em] text-text-dark">Track every farm you monitor</h2>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 className="field min-w-[260px]"
-                placeholder="Search farms, owners, crop, or location"
+                placeholder="Search by farm, owner, crop, or location"
               />
-              <Button onClick={() => setShowCreate(true)}>
+              <Button onClick={openCreate}>
                 <Plus className="h-4 w-4" />
-                Add Farm
+                Add farm
               </Button>
             </div>
           </div>
@@ -98,15 +138,15 @@ function Farms() {
               key={farm.id}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.06 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <Card className={farm.risk === 'High' ? 'border-rose-200 bg-rose-50/40' : ''}>
+              <Card className={farm.archived ? 'opacity-70' : ''}>
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-3">
                       <p className="panel-label">{farm.id}</p>
                       <Badge variant={farm.risk === 'High' ? 'danger' : farm.risk === 'Moderate' ? 'warning' : 'success'}>
-                        {farm.risk} risk
+                        {farm.archived ? 'Archived' : `${farm.risk} risk`}
                       </Badge>
                     </div>
                     <h3 className="mt-2 text-xl font-semibold tracking-[-0.02em] text-text-dark">{farm.name}</h3>
@@ -148,13 +188,16 @@ function Farms() {
                     <Button variant="secondary" onClick={() => setSelectedFarm(farm)}>
                       View
                     </Button>
-                    <Button variant="ghost">
+                    <Button variant="ghost" onClick={() => openEdit(farm)}>
                       <Pencil className="h-4 w-4" />
                       Edit
                     </Button>
-                    <Button variant="ghost">
+                    <Button variant="ghost" onClick={() => handleArchive(farm)}>
                       <Trash2 className="h-4 w-4" />
                       Archive
+                    </Button>
+                    <Button variant="ghost" onClick={() => handleDelete(farm)}>
+                      Delete
                     </Button>
                   </div>
                 </div>
@@ -162,6 +205,12 @@ function Farms() {
             </motion.div>
           ))}
         </div>
+
+        {!filteredFarms.length && (
+          <Card>
+            <p className="text-sm text-text-mid">No farms found. Add a client farm to start tracking acreage, location, and alerts.</p>
+          </Card>
+        )}
       </div>
 
       <Modal isOpen={Boolean(selectedFarm)} onClose={() => setSelectedFarm(null)} title="Farm details">
@@ -176,7 +225,7 @@ function Farms() {
                 ['Location', selectedFarm.location],
                 ['Active alerts', String(selectedFarm.alerts)],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-2xl bg-beige px-4 py-4">
+                <div key={label} className="rounded-3xl bg-beige px-4 py-4">
                   <p className="text-sm text-text-muted">{label}</p>
                   <p className="mt-2 font-medium text-text-dark">{value}</p>
                 </div>
@@ -184,13 +233,36 @@ function Farms() {
             </div>
             <div className="rounded-3xl bg-moss-pale p-5">
               <p className="panel-label text-moss">Contact</p>
-              <div className="mt-3 flex items-center gap-3">
-                <div className="rounded-full bg-white p-3 text-moss">
-                  <Phone className="h-4 w-4" />
+              <div className="mt-3 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-white p-3 text-moss">
+                    <Phone className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-text-dark">{selectedFarm.phone || 'No phone added'}</p>
+                    <p className="text-sm text-text-mid">Phone</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-text-dark">{selectedFarm.owner}</p>
-                  <p className="text-sm text-text-mid">{selectedFarm.phone}</p>
+                <div className="flex items-center gap-3">
+                  <div className="rounded-full bg-white p-3 text-moss">
+                    <Mail className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-text-dark">{selectedFarm.email || 'No email added'}</p>
+                    <p className="text-sm text-text-mid">Email</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-3 pt-2">
+                  {selectedFarm.email && (
+                    <a href={`mailto:${selectedFarm.email}`}>
+                      <Button variant="secondary">Send email</Button>
+                    </a>
+                  )}
+                  {selectedFarm.phone && (
+                    <a href={`https://wa.me/${selectedFarm.phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">
+                      <Button variant="secondary">WhatsApp</Button>
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
@@ -198,39 +270,36 @@ function Farms() {
         )}
       </Modal>
 
-      <AnimatePresence>
-        {showCreate && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-text-dark/35 p-4 backdrop-blur-sm"
-          >
-            <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.96 }} className="surface w-full max-w-2xl p-6">
-              <div className="mb-5 flex items-center justify-between">
-                <h3 className="text-2xl font-semibold tracking-[-0.02em] text-text-dark">Create new farm</h3>
-                <button onClick={() => setShowCreate(false)} className="rounded-full bg-moss-pale p-2 text-moss">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <input className="field" placeholder="Farm name" />
-                <input className="field" placeholder="Owner / manager" />
-                <input className="field" placeholder="Crop type" />
-                <input className="field" placeholder="Acreage" />
-                <input className="field sm:col-span-2" placeholder="Location" />
-              </div>
-              <div className="mt-5 flex justify-end gap-3">
-                <Button variant="secondary" onClick={() => setShowCreate(false)}>Cancel</Button>
-                <Button onClick={() => setShowCreate(false)}>Save farm</Button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <Modal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title={editingFarm ? 'Edit farm' : 'Add farm'}>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <input className="field" placeholder="Farm name" value={form.name} onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))} />
+            <input className="field" placeholder="Owner / manager" value={form.owner} onChange={(event) => setForm((current) => ({ ...current, owner: event.target.value }))} />
+            <input className="field" placeholder="Crop type" value={form.crop} onChange={(event) => setForm((current) => ({ ...current, crop: event.target.value }))} />
+            <input className="field" placeholder="Acreage" value={form.acreage} onChange={(event) => setForm((current) => ({ ...current, acreage: event.target.value }))} />
+            <input className="field sm:col-span-2" placeholder="Location" value={form.location} onChange={(event) => setForm((current) => ({ ...current, location: event.target.value }))} />
+            <select className="field" value={form.risk} onChange={(event) => setForm((current) => ({ ...current, risk: event.target.value }))}>
+              <option>Low</option>
+              <option>Moderate</option>
+              <option>High</option>
+            </select>
+            <input className="field" placeholder="Active alerts" value={form.alerts} onChange={(event) => setForm((current) => ({ ...current, alerts: event.target.value }))} />
+            <input className="field" placeholder="Phone" value={form.phone} onChange={(event) => setForm((current) => ({ ...current, phone: event.target.value }))} />
+            <input className="field" placeholder="Email" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} />
+          </div>
+          {error && <p className="text-sm text-rose-700">{error}</p>}
+          <div className="flex justify-end gap-3">
+            <Button variant="secondary" onClick={() => setIsFormOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save farm'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </AppFrame>
   );
 }
 
 export default Farms;
-

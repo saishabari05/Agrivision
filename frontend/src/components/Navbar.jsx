@@ -22,7 +22,7 @@ function Navbar({ onOpenMenu }) {
         <nav className="hidden items-center gap-8 text-sm font-medium text-text-mid lg:flex">
           <a href="#features">Features</a>
           <a href="#workflow">How it Works</a>
-          <a href="#stories">Stories</a>
+          <a href="#start">Get Started</a>
         </nav>
         <div className="flex items-center gap-3">
           <Link to="/login" className="hidden sm:block">

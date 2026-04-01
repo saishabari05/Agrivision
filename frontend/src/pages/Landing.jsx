@@ -1,12 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import {
-  ArrowRight,
-  BrainCircuit,
-  ChartNoAxesColumn,
-  ShieldCheck,
-  Sparkles,
-  X,
-} from 'lucide-react';
+import { ArrowRight, BrainCircuit, Leaf, ShieldCheck, Sparkles, Upload, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
@@ -23,19 +16,25 @@ const ambient = {
 const features = [
   {
     icon: BrainCircuit,
-    title: 'AI disease intelligence',
-    description: 'Turn crop imagery into confidence-led disease signals, severity flags, and decision-ready summaries.',
+    title: 'Clear AI output',
+    description: 'See the disease, confidence, and severity in a format that is easy to scan.',
   },
   {
-    icon: ChartNoAxesColumn,
-    title: 'Operational reporting',
-    description: 'Track detections, weekly shifts, and multi-farm activity with report workflows built for real teams.',
+    icon: Upload,
+    title: 'Simple upload flow',
+    description: 'Upload a leaf image once, then review the analysis without extra steps.',
   },
   {
     icon: ShieldCheck,
-    title: 'Enterprise-ready control',
-    description: 'Support secure access, profile visibility, structured histories, and scalable rollout across operations.',
+    title: 'Action-ready guidance',
+    description: 'Get concise recommendations you can act on right away.',
   },
+];
+
+const steps = [
+  ['01', 'Upload a crop image', 'Add one clear field image with an optional location.'],
+  ['02', 'Review weather-aware analysis', 'The backend resolves location, checks weather, and prepares the context.'],
+  ['03', 'Use the recommendation', 'Open the report and chat for follow-up guidance.'],
 ];
 
 function Landing() {
@@ -67,10 +66,10 @@ function Landing() {
                   Features
                 </a>
                 <a href="#workflow" onClick={() => setOpen(false)} className="block rounded-2xl bg-white px-4 py-3">
-                  Workflow
+                  How it Works
                 </a>
-                <a href="#trust" onClick={() => setOpen(false)} className="block rounded-2xl bg-white px-4 py-3">
-                  Trust
+                <a href="#start" onClick={() => setOpen(false)} className="block rounded-2xl bg-white px-4 py-3">
+                  Get Started
                 </a>
                 <Link to="/login" className="block">
                   <Button className="mt-2 w-full">Get Started</Button>
@@ -81,39 +80,39 @@ function Landing() {
         )}
       </AnimatePresence>
 
-      <main className="page-wrap space-y-16 pt-10 sm:pt-14">
-        <section className="grid items-start gap-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="space-y-6 pt-4">
+      <main className="page-wrap space-y-20 py-10 sm:py-14 lg:py-16">
+        <section id="start" className="grid items-center gap-10 lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="space-y-6 lg:pr-4">
             <span className="inline-flex items-center gap-2 rounded-full bg-moss-pale px-4 py-2 text-xs font-semibold uppercase tracking-[0.22em] text-moss">
               <Sparkles className="h-3.5 w-3.5" />
-              AI operations studio
+              Crop intelligence start page
             </span>
-            <h1 className="max-w-2xl text-4xl font-semibold leading-[1.08] tracking-[-0.03em] text-text-dark sm:text-5xl">
-              Joyful, intelligent crop monitoring for serious agricultural teams.
+            <h1 className="max-w-2xl text-4xl font-semibold leading-[1.05] tracking-[-0.04em] text-text-dark sm:text-5xl lg:text-6xl">
+              One clear place to upload, review, and act on crop analysis.
             </h1>
             <p className="max-w-xl text-base leading-8 text-text-mid sm:text-lg">
-              AgriVision combines disease detection, operational reporting, field visibility, and AI guidance in a
-              product experience designed to feel premium, structured, and ready for real daily use.
+              Upload a field image, let the backend resolve location and weather context, then read a concise AI
+              recommendation without hunting through extra screens.
             </p>
             <div className="flex flex-wrap gap-3">
               <Link to="/login">
                 <Button>
-                  Enter Platform
+                  Start with AgriVision
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <a href="#features">
-                <Button variant="secondary">See Capability Map</Button>
+              <a href="#workflow">
+                <Button variant="secondary">See the flow</Button>
               </a>
             </div>
             <div className="grid max-w-2xl gap-3 pt-2 sm:grid-cols-3">
               {[
-                ['18', 'Active AI insights'],
-                ['94%', 'Average confidence'],
-                ['12', 'Multi-state operations'],
+                ['1 image', 'One upload starts the analysis'],
+                ['Weather', 'Location-aware context'],
+                ['LLM output', 'Short, practical guidance'],
               ].map(([value, label]) => (
                 <div key={label} className="rounded-2xl border border-[#d9d4c8] bg-white/80 px-4 py-4">
-                  <p className="text-2xl font-display text-text-dark">{value}</p>
+                  <p className="text-xl font-display text-text-dark">{value}</p>
                   <p className="mt-1 text-sm text-text-muted">{label}</p>
                 </div>
               ))}
@@ -126,26 +125,25 @@ function Landing() {
               transition={ambient}
               className="surface overflow-hidden p-4 sm:p-5"
             >
-              <div className="grid gap-4 lg:grid-cols-[1.05fr_0.85fr]">
+              <div className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
                 <div className="rounded-[1.6rem] bg-text-dark p-5 text-white">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="panel-label !text-white/55">Live intelligence</p>
-                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em]">Detection Command</h2>
+                      <p className="panel-label !text-white/55">What the user sees</p>
+                      <h2 className="mt-2 text-2xl font-semibold tracking-[-0.02em]">A calmer analysis screen</h2>
                     </div>
                     <span className="ai-dot" />
                   </div>
                   <div className="mt-6 grid gap-3 sm:grid-cols-2">
                     {[
-                      ['Tomato / Nashik', 'Early blight', '94%'],
-                      ['Apple / Shimla', 'Scab risk', '91%'],
-                      ['Grape / Pune', 'Low severity', '88%'],
-                      ['Reports', '12 ready', 'Today'],
-                    ].map(([title, subtitle, tag]) => (
+                      ['Upload', 'Image + location'],
+                      ['Weather', 'Resolved automatically'],
+                      ['LLM', 'Practical recommendation'],
+                      ['Chat', 'Follow-up context'],
+                    ].map(([title, subtitle]) => (
                       <div key={title} className="rounded-2xl bg-white/8 p-4">
                         <p className="text-sm font-medium text-white">{title}</p>
                         <p className="mt-2 text-sm text-white/65">{subtitle}</p>
-                        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#d8e7d9]">{tag}</p>
                       </div>
                     ))}
                   </div>
@@ -153,30 +151,24 @@ function Landing() {
 
                 <div className="grid gap-4">
                   <div className="rounded-[1.6rem] bg-beige p-5">
-                    <p className="panel-label">Model activity</p>
+                    <p className="panel-label">Response style</p>
                     <div className="mt-4 flex items-end justify-between">
-                      <p className="text-4xl font-bold tracking-[-0.03em] text-text-dark">24/7</p>
-                      <span className="rounded-full bg-moss-pale px-3 py-1 text-xs font-semibold text-moss">Online</span>
+                      <p className="text-4xl font-bold tracking-[-0.03em] text-text-dark">Short</p>
+                      <span className="rounded-full bg-moss-pale px-3 py-1 text-xs font-semibold text-moss">Clear</span>
                     </div>
-                    <div className="mt-6 space-y-3">
-                      <div className="h-2 rounded-full bg-white">
-                        <div className="h-2 w-[82%] rounded-full bg-moss" />
-                      </div>
-                      <div className="flex items-center justify-between text-sm text-text-mid">
-                        <span>Inference throughput</span>
-                        <span>82%</span>
-                      </div>
+                    <div className="mt-6 rounded-2xl bg-white px-4 py-4 text-sm leading-7 text-text-mid">
+                      The home page should explain the product, not the workflow in detail. The workflow belongs after the user enters the platform.
                     </div>
                   </div>
                   <div className="rounded-[1.6rem] bg-moss-pale p-5">
-                    <p className="panel-label">Recommendation engine</p>
-                    <p className="mt-4 text-xl font-medium text-text-dark">
-                      Next-best-action suggestions are generated per crop, severity, and region.
+                    <p className="panel-label">What happens next</p>
+                    <p className="mt-4 text-lg font-medium leading-8 text-text-dark">
+                      After login, users go to Upload, review the result, then open reports or chat for follow-up.
                     </p>
                     <div className="mt-5 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Disease risk</span>
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Severity</span>
-                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Treatment guidance</span>
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Upload</span>
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Review</span>
+                      <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-text-mid">Act</span>
                     </div>
                   </div>
                 </div>
@@ -195,15 +187,14 @@ function Landing() {
         </section>
 
         <section className="rounded-[2rem] bg-moss px-6 py-8 text-white sm:px-8">
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-6 md:grid-cols-3">
             {[
-              ['3,000+', 'Acres under intelligence'],
-              ['43', 'Weekly detections reviewed'],
-              ['12', 'Operational regions'],
-              ['37', 'Reports delivered this cycle'],
+              ['Upload first', 'Start with one image and optional location.'],
+              ['Then review', 'See the disease result and weather-aware advice.'],
+              ['Then act', 'Open reports or chat for the next step.'],
             ].map(([value, label]) => (
               <div key={label} className="rounded-2xl bg-white/8 px-4 py-4">
-                <p className="text-4xl font-display">{value}</p>
+                <p className="text-2xl font-display">{value}</p>
                 <p className="mt-2 text-sm text-white/72">{label}</p>
               </div>
             ))}
@@ -212,11 +203,10 @@ function Landing() {
 
         <section id="features" className="grid gap-6 xl:grid-cols-[0.78fr_1.22fr]">
           <div className="space-y-4">
-            <p className="panel-label text-moss">Capability map</p>
-            <h2 className="text-3xl font-semibold tracking-[-0.03em] text-text-dark sm:text-4xl">Built like a real operating system for crop intelligence.</h2>
+            <p className="panel-label text-moss">What it does</p>
+            <h2 className="text-3xl font-semibold tracking-[-0.03em] text-text-dark sm:text-4xl">A focused home page for a focused product.</h2>
             <p className="max-w-md text-base leading-8 text-text-mid">
-              The product experience is designed around actual workflows: scanning, reviewing, triaging, reporting, and
-              taking action.
+              Keep the home page short. The actual work starts after sign-in, where users upload and review analysis.
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-3">
@@ -233,11 +223,7 @@ function Landing() {
         </section>
 
         <section id="workflow" className="grid gap-5 lg:grid-cols-3">
-          {[
-            ['01', 'Capture field evidence', 'Upload crop images with location and contextual metadata.'],
-            ['02', 'Interpret AI output', 'Review disease confidence, severity, and recommended next actions.'],
-            ['03', 'Coordinate response', 'Share reports, track risks, and move operational teams faster.'],
-          ].map(([step, title, description]) => (
+          {steps.map(([step, title, description]) => (
             <Card key={step}>
               <div className="flex items-center justify-between">
                 <span className="rounded-full bg-moss px-3 py-1 text-xs font-semibold text-white">{step}</span>
@@ -249,26 +235,21 @@ function Landing() {
           ))}
         </section>
 
-        <section id="trust" className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <div className="rounded-[2rem] bg-text-dark px-8 py-10 text-white">
-            <p className="panel-label !text-white/50">Why teams stay</p>
-            <p className="mt-4 max-w-2xl text-2xl font-semibold leading-relaxed tracking-[-0.02em]">
-              "AgriVision turns detection into a dependable daily workflow, not just an impressive demo."
-            </p>
-            <p className="mt-6 text-sm uppercase tracking-[0.22em] text-white/65">Operations Lead, Mist Agri Corps Ltd</p>
-          </div>
-          <div className="rounded-[2rem] bg-beige px-8 py-10">
-            <p className="panel-label text-moss">Ready to launch</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-text-dark">Bring a more intelligent, more joyful operating layer to agriculture.</h2>
-            <p className="mt-4 text-base leading-8 text-text-mid">
-              AgriVision is designed to feel modern and alive while staying credible for serious operational use.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
+        <section className="rounded-[2rem] bg-beige px-8 py-10">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="max-w-2xl space-y-3">
+              <p className="panel-label text-moss">Ready to begin</p>
+              <h2 className="text-3xl font-semibold tracking-[-0.03em] text-text-dark">Log in, upload one image, and get a clear result.</h2>
+              <p className="text-base leading-8 text-text-mid">
+                The start page now stays simple. The analysis workflow lives inside the app after login.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
               <Link to="/login">
-                <Button>Start with AgriVision</Button>
+                <Button>Get Started</Button>
               </Link>
-              <a href="#features">
-                <Button variant="secondary">Explore architecture</Button>
+              <a href="#start">
+                <Button variant="secondary">Back to top</Button>
               </a>
             </div>
           </div>

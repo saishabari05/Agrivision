@@ -1,42 +1,42 @@
-import { mockProfile } from './mockData';
-
-const wait = (ms = 600) => new Promise((resolve) => window.setTimeout(resolve, ms));
+import { loginWithEmailApi, registerWithEmailApi, updateProfile as updateProfileApi } from './api';
 
 export async function loginWithEmail(email, password) {
-  await wait();
-
   if (!email || !password) {
     throw new Error('Email and password are required.');
   }
 
-  return {
-    ...mockProfile,
-    email,
-    name: email.split('@')[0].replace(/\./g, ' '),
-  };
+  const response = await loginWithEmailApi({ email, password });
+  if (!response?.user) {
+    throw new Error('Invalid login response from backend.');
+  }
+  return { ...response.user, token: response.access_token };
 }
 
-export async function loginWithGoogle() {
-  await wait();
-  return mockProfile;
+export async function registerWithEmail(name, email, password) {
+  if (!name || !email || !password) {
+    throw new Error('Name, email, and password are required.');
+  }
+
+  const response = await registerWithEmailApi({ name, email, password });
+  if (!response?.user) {
+    throw new Error('Registration failed.');
+  }
+  return { ...response.user, token: response.access_token };
 }
 
 export async function forgotPassword(email) {
-  await wait(400);
-
   if (!email) {
     throw new Error('Enter an email address to receive a reset link.');
   }
 
-  return { success: true };
+  return { success: true, message: 'Password reset is not implemented in backend yet.' };
 }
 
 export async function updateProfile(profile) {
-  await wait(350);
-  return profile;
+  return updateProfileApi(profile);
 }
 
 export async function logoutUser() {
-  await wait(200);
+  return Promise.resolve();
 }
 

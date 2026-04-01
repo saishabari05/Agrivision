@@ -11,6 +11,7 @@ import Landing from './pages/Landing';
 import Login from './pages/Login';
 import Overview from './pages/Overview';
 import Profile from './pages/Profile';
+import Register from './pages/Register';
 import Reports from './pages/Reports';
 import Splash from './pages/Splash';
 import Upload from './pages/Upload';
@@ -38,6 +39,7 @@ function App() {
         />
         <Route path="/splash" element={<Splash />} />
         <Route path="/login" element={isAuthenticated ? <Navigate to="/overview" replace /> : <Login />} />
+        <Route path="/register" element={isAuthenticated ? <Navigate to="/overview" replace /> : <Register />} />
         <Route
           path="/overview"
           element={
@@ -110,6 +112,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/chatbot" element={<Navigate to="/chat" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
